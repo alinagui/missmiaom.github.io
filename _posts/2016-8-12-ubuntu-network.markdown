@@ -33,7 +33,7 @@ tags:
 
 **注意：** 上述博文中，我桥接的是无线网卡，而这里要用到网线，所以 **要桥接到有线网卡！** 如下图：
 
-<img src="http://leiym.com/img/in-post/post-ROS/network_bridge.png"/>
+<img src="http://leiym.com/img/in-post/post-ros/network_bridge.png"/>
 
 ### 物理机配置步骤
 
