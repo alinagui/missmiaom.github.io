@@ -13,9 +13,9 @@ tags:
 
 ### 概述
 
-ROS，从软件构架的角度说，是一种基于消息传递通信的分布式多进程框架。ROS 进程之间的通信其实是基于标准的 TCP/IP 协议的，所以在传递 *Messages* 或者 *Services* 时，必须先经过一个打包的过程，而接收时也需要一个解包的过程，这些都是传输主要的损耗时间。在数据量小，频率低的情况下，传输耗费的时间可以忽略不计。但当传输图像流，点云等数据量较大，或者执行有一定的实时性要求的任务时，因为传输而耗费的时间就不得不考虑。
+ROS，从软件构架的角度说，是一种基于消息传递通信的分布式多进程框架。ROS 进程之间的通信其实是基于标准的 TCP/IP 协议的，所以在传递 *Messages* 或者 *Services* 时，必须先经过一个打包的过程，而接收时也需要一个解包的过程，这些都会导致在传输过程中损耗不少时间。在数据量小，频率低的情况下，传输耗费的时间可以忽略不计。但当传输图像流，点云等数据量较大的消息，或者执行有一定的实时性要求的任务时，因为传输而耗费的时间就不得不考虑。
 
-ROS 中需要有一个工具能够解决这个问题，**nodelet** 便诞生了。*nodelet* 的目的是提供一种方法，可以让多个算法程序在一个进程中用 *shared_ptr* 实现零复制通信（zero copy transport），以降低因为传输大数据而损耗的时间。
+ROS 中需要有一个工具能够解决这个问题，**nodelet** 便诞生了。*nodelet* 的设计目的是提供一种方法，可以让多个算法程序在一个进程中用 *shared_ptr* 实现零复制通信（zero copy transport），以降低因为传输大数据而损耗的时间。
 
 *nodelet* 设计目标：
 
@@ -33,7 +33,7 @@ ROS 中需要有一个工具能够解决这个问题，**nodelet** 便诞生了�
 
 **nodelet 是基于 pluginlib 插件机制的，对于不太熟悉 pluginlib 的读者，我推荐先浏览一遍我之前的博客： [pluginlib详解](http://leiym.com/2016/08/10/ROS-pluginlib/)**
 
-由于 *nodelet* 的使用了插件机制，所以其使用方法和 *pluginlib* 的使用方法类似。具体使用方法有以下三步。
+由于 *nodelet* 使用了插件机制，所以其使用方法和 *pluginlib* 的使用方法类似。具体使用方法有以下三步。
 
 1. 继承 *nodelet::Nodelet* 基类，并实现 *onInit* 纯虚函数，以用于初始化。
 2. 加入 *PLUGINLIB_EXPORT_CLASS* 宏将子类声明为插件类，并编译为动态库。
@@ -43,7 +43,7 @@ ROS 中需要有一个工具能够解决这个问题，**nodelet** 便诞生了�
 
 #### 第一步：编写子类
 
-*pub_with_nodelet.cpp* :
+##### *pub_with_nodelet.cpp* :
 
 ```
 #include <ros/ros.h>
@@ -52,10 +52,8 @@ ROS 中需要有一个工具能够解决这个问题，**nodelet** 便诞生了�
 #include <ecl/threads/thread.hpp>
 #include <std_msgs/Int64MultiArray.h>
 
-
 namespace nodelet_test
 {
-
   class Pub_nodelet : public nodelet::Nodelet
   {
   public:
@@ -102,13 +100,14 @@ namespace nodelet_test
 
 PLUGINLIB_EXPORT_CLASS(nodelet_test::Pub_nodelet, nodelet::Nodelet)
 ```
+
 以下是分段解释：
 
 ```
   class Pub_nodelet : public nodelet::Nodelet
 ```
 
-实现继承于基类 *nodelet::Nodelet* 的 *Pub_nodelet* 类。
+实现继承于 *nodelet::Nodelet* 基类的 *Pub_nodelet* 子类。
 
 ```
 virtual void onInit()
@@ -122,9 +121,9 @@ virtual void onInit()
 }
 ```
 
-当 *nodelet* 插件类被 *nodelet_manager* 加载时，*nodelet* 插件类的 *onInit* 方法就会被调用，初始化插件类， **onInit 方法不能被阻塞，只用于初始化，如果 nodelet 插件需要执行循环任务，要将其放入线程中执行。**
+当 *nodelet* 插件类被 *nodelet_manager* 加载时，*nodelet* 插件类的 *onInit* 方法就会被调用，用于初始化插件类。 **onInit 方法不能被阻塞，只用于初始化，如果 nodelet 插件需要执行循环任务，要将其放入线程中执行。**
 
-*getNodeHandle* 方法可以获得 *nodelet_manager* 的 *nodehandle* 。相应的 *getPrivateNodeHandle* 可以获得私有 *nodehandle* 。
+*getNodeHandle* 方法可以获得 *nodelet_manager* 的 *nodehandle* 。相应的 *getPrivateNodeHandle* 可以获得 *private nodehandle* 。
 
 ```
     void publish()
@@ -138,7 +137,7 @@ virtual void onInit()
     }
 ```
 
-*publish* 进程中，我初始化了 *Int64MultiArrayPtr* 类型的消息，为了方便之后比较用与不用 *nodelet* 的差别，我压入了五千万个随机数。至于消息类型的后缀 *Ptr*，是消息类型的 *shared_ptr*，即共享指针，它是 *roscpp* 来对进程内进行零复制的优化的一个工具。 [shared_ptr 详情点击这里]( roscpp/Overview/Publishers and Subscribers#Intraprocess_Publishing)。
+*publish* 线程中，我声明了 *Int64MultiArrayPtr* 类型的消息 *array* ，为了方便之后比较用与不用 *nodelet* 的差别，我压入了五千万个随机数。至于消息类型的后缀 *Ptr*，是消息类型的 *shared_ptr*，即共享指针，它是 *roscpp* 来对进程内实现零复制的一个优化工具。 [shared_ptr 详情点击这里]( roscpp/Overview/Publishers and Subscribers#Intraprocess_Publishing)。
 
 ```
 ROS_INFO(" %d ,publish!", num++);
@@ -146,7 +145,8 @@ ROS_INFO(" %d ,publish!", num++);
 
 每发布一条消息，使用 *ROS_INFO* 宏来打印时间和次序。
 
-*sub_with_nodelet.cpp*：
+
+##### *sub_with_nodelet.cpp* ：
 
 ```
 #include <ros/ros.h>
@@ -190,7 +190,7 @@ namespace nodelet_test
 PLUGINLIB_EXPORT_CLASS(nodelet_test::Sub_nodelet, nodelet::Nodelet)
 ```
 
-接收消息的 *nodelet* 的插件，每接收到一条消息，就使用 *ROS_INFO* 宏来打印时间和次序。
+接收消息的 *nodelet* 插件，每接收到一条消息，就使用 *ROS_INFO* 宏来打印时间和次序。
 
 #### 第二步：编译为动态库
 
@@ -204,9 +204,9 @@ PLUGINLIB_EXPORT_CLASS(nodelet_test::Pub_nodelet, nodelet::Nodelet)
 
 #### 第三步：使 ROS 工具链可以找到相应的 *nodelet* 插件
 
-这一步其实就是 *pluginlib* 的使用方法，不在赘述，不太明白的读者可以详读上面提到的博文。
+这一步其实就是 *pluginlib* 的使用方法，不再赘述，不太明白的读者可以详读上面提到的博文。
 
-*pub_nodelet.xml* :
+##### *pub_nodelet.xml* :
 
 ```
 <library path="lib/libpub_nodelet">
@@ -217,7 +217,7 @@ PLUGINLIB_EXPORT_CLASS(nodelet_test::Pub_nodelet, nodelet::Nodelet)
   </class>
 </library>
 ```
-*sub_nodelet.xml* ：
+##### *sub_nodelet.xml* ：
 
 ```
 <library path="lib/libsub_nodelet">
@@ -229,7 +229,7 @@ PLUGINLIB_EXPORT_CLASS(nodelet_test::Pub_nodelet, nodelet::Nodelet)
 </library>
 ```
 
-*packgae.xml* :
+##### *packgae.xml* :
 
 ```
 ...
@@ -250,9 +250,9 @@ PLUGINLIB_EXPORT_CLASS(nodelet_test::Pub_nodelet, nodelet::Nodelet)
 
 然后分别开启 *sub_with_nodelet* 和 *pub_with_nodelet* 。
 
-`rosrun nodelet nodelet load nodelet_test/Sub_nodelet nodelet_manager _output:=screen`
+`$ rosrun nodelet nodelet load nodelet_test/Sub_nodelet nodelet_manager _output:=screen`
 
-`rosrun nodelet nodelet load nodelet_test/Pub_nodelet nodelet_manager _output:=screen`
+`$ rosrun nodelet nodelet load nodelet_test/Pub_nodelet nodelet_manager _output:=screen`
 
 <img src="http://leiym.com/img/in-post/post-ros/nodelet_r7.png"/>
 
@@ -295,7 +295,7 @@ PLUGINLIB_EXPORT_CLASS(nodelet_test::Pub_nodelet, nodelet::Nodelet)
 
 可以看到，在同一进程中使用 *shared_ptr* 进行的是零拷贝复制，非常迅速，平均时间和使用 *nodelet* 相近。
 
-#### 在同一进程中不适用 *shared_ptr* 进行发布和接收：
+#### 在同一进程中不使用 *shared_ptr* 进行发布和接收：
 
 五次的发布和接收的时间：
 
@@ -303,7 +303,7 @@ PLUGINLIB_EXPORT_CLASS(nodelet_test::Pub_nodelet, nodelet::Nodelet)
 
 可以看到，在同一进程中不使用 *shared_ptr* 进行的是拷贝复制，时间损耗也大概在 **1.3s** 左右，和在不同进程中分别发布接收的效果相同。
 
-所以，运行时间的对比也证实了博文开头讲解的 *nodelet* 机制：其使用 *pluginlib* 动态插件机制，将不同的算法加载到同一个 *nodelet_manager* 进程中，使用 *shared_ptr* 来实现零复制通信，以降低因为传输大数据而损耗的时间。
+所以，运行时间的对比也证实了博文开头讲解的 *nodelet* 机制：其使用 *pluginlib* 动态插件机制，将不同的算法程序加载到同一个 *nodelet_manager* 进程中，使用 *shared_ptr* 来实现零复制通信，以降低因为传输大数据而损耗的时间。
 
 ---
 
