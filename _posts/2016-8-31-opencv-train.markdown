@@ -96,28 +96,44 @@ tags:
 ##### 颜色空间转换
 `void cvtColor(InputArray src, OutputArray dst, int code, int dstCn=0 )`
 * *src*:输入图像
+
 * *dst*:输出图像
+
 * *code*:颜色转换类型，比如：CV_BGR2Lab,CV_BGR2HSV,CV_HSV2BGR,CV_BGR2RGB
+
 * *dstCn*:输出图像的通道号，如果默认为0，则表示按输入图像的通道数。
 
 ##### 计算直方图
 `void calcHist(const Mat* images, int nimages, const int* channels, InputArray mask, OutputArray hist, int dims, const int* histSize, const float** ranges, bool uniform=true, bool accumulate=false )`
 * _const Mat* images_：为输入图像的指针。
+
 * *int nimages*：要计算直方图的图像的个数。此函数可以为多图像求直方图，通常情况下都只作用于单一图像，所以通常nimages=1。
+
 * _const int* channels_：图像的通道，它是一个数组，如果是灰度图像则channels[1]={0};如果是彩色图像则channels[3]={0,1,2}；如果是只是求彩色图像第2个通道的直方图，则channels[1]={1};
+
 * *IuputArray mask*：一个遮罩图像用于确定哪些点参与计算，默认情况我们都设置为一个空图像，即：Mat()。
+
 * *OutArray hist*：计算得到的直方图
+
 * *int dims*：得到的直方图的维数，灰度图像为1维，彩色图像为3维。
+
 * *const int* histSize*：直方图横坐标的区间数。如果是10，则它会横坐标分为10份，然后统计每个区间的像素点总和。
+
 * _const float** ranges_：一个二维数组，用来指出每个区间的范围。
+
 后面两个参数都有默认值，uniform参数表明直方图是否等距，accumulate参数与多图像下直方图的显示与存储有关。
 
 ##### 阈值化
 `double threshold(InputArray src, OutputArray dst, double thresh, double maxval, int type)`
+
 * *src*：输入图像。
+
 * *dst*：输出图像。
+
 * *thresh*：阈值。
+
 * *maxval*：当第五个参数阈值类型type取 THRESH_BINARY 或THRESH_BINARY_INV阈值类型时的最大值.
+
 * *itype*：阈值化类型。
 
 ```
@@ -132,11 +148,17 @@ tags:
 `void addWeighted(InputArray src1, double alpha, InputArray src2, double beta, double gamma, OutputArray dst, int dtype=-1);`
 计算两个Mat的加权和。  
 * *src1*   表示需要加权的第一个数组。
+
 * *alpha*  表示第一个数组的权重
+
 * *src2*   表示第二个数组，它需要和第一个数组拥有相同的尺寸和通道数。
+
 * *beta*   表示第二个数组的权重。
+
 * *dst*    输出的数组，它和输入的两个数组拥有相同的尺寸和通道数。
+
 * *gamma*  一个加到权重总和上的标量值。
+
 * *dtype*  输出阵列的可选深度，有默认值-1。;当两个输入数组具有相同的深度时，这个参数设置为-1（默认值），即等同于src1.depth（）。
 
 __dst = src1[I]*alpha+ src2[I]*beta + gamma;__  
@@ -144,33 +166,48 @@ __dst = src1[I]*alpha+ src2[I]*beta + gamma;__
 
 ##### 轨迹条
 `int createTrackbar(conststring& trackbarname, conststring& winname,int* value, int count, TrackbarCallback onChange=0,void* userdata=0); `
+
 * *trackbarname*  ，表示轨迹条的名字，用来代表创建的轨迹条。
+
 * *winname*       ，填窗口的名字，表示这个轨迹条会依附到哪个窗口上，即对应namedWindow（）创建窗口时填的某一个窗口名。
+
 * *value*         ，一个指向整型的指针，表示滑块的位置。并且在创建时，滑块的初始位置就是该变量当前的值。
+
 * *count*         ，表示滑块可以达到的最大位置的值。PS:滑块最小的位置的值始终为0。
+
 * *onChange*      ，首先注意有默认值0。这是一个指向回调函数的指针，每次滑块位置改变时，这个函数都会进行回调。并且这个函数的原型必须为void XXXX(int,void*);其中第一个参数是轨迹条的位置，第二个参数是用户数据（看下面的第六个参数）。如果回调是NULL指针，表示没有回调函数的调用，仅第三个参数value有变化。
+
 * *userdata*      ，也有默认值0。这个参数是用户传给回调函数的数据，用来处理轨迹条事件。如果使用的第三个参数value实参是全局变量的话，完全可以不去管这个userdata参数。
 
 
 ### 形态学基本操作
 
 * *腐蚀运算* 的作用是消除物体的边界点，使目标缩小，腐蚀操作会消除小且无意义的物体，使边界向内部收缩。
+
 * *膨胀运算* 的作用是使目标增大，填充物体内细小的空洞，并且平滑物体的边界，使边界向外部扩张。
+
 * *开运算* 是先腐蚀后膨胀的过程，可以消除图像上细小的噪声，并平滑物体的边界
+
 * *闭运算* 是先膨胀后腐蚀的过程，可以填充物体内细小的空洞，并平滑物体边界
+
 * *形态学梯度* 膨胀图与腐蚀图之差，可以将边缘突出
 
 ##### 腐蚀运算
 `void erode(InputArray src, OutputArray dst, InputArray kernel, Point anchor=Point(-1,-1),int iterations=1, int borderType=BORDER_CONSTANT,const Scalar& borderValue=morphologyDefaultBorderValue());`
 * *src*：输入图像，很多场合下我们使用的是二值图像，当然灰度图像也可以。
+
 * *dst*：输出图像，格式和输入图像一致。
+
 * *kernel*：定义的结构元素。
+
 * *anchor*：结构元素的中心，如果是默认参数(-1,-1)，程序会自动将其设置为结构元素的中心。
+
 * *iterations*：迭代次数，我们可以选择对图像进行多次形态学运算。
 后面两个参数是边界类型，由于要处理领域问题，所以图像需要扩充边界。一般情况下使用默认即可。
 
 ##### 膨胀运算
 `void dilate(InputArray src, OutputArray dst, InputArray kernel, Point anchor=Point(-1,-1),int iterations=1, int borderType=BORDER_CONSTANT,const Scalar& borderValue=morphologyDefaultBorderValue());`
+
 * 参数含义与腐蚀运算完全一致。
 
 ##### 开运算，闭运算，形态学梯度
@@ -178,17 +215,26 @@ __dst = src1[I]*alpha+ src2[I]*beta + gamma;__
 
 *op*：
 * MORPH_OPEN：开运算（Opening operation）
+
 * MORPH_CLOSE：闭运算（Closing operation）
+
 * MORPH_GRADIENT：形态学梯度（Morphological gradient）
+
 * MORPH_TOPHAT：“顶帽”（“Top hat”）
+
 * MORPH_BLACKHAT：“黑帽”（“Black hat“）
+
 其余参数含义与腐蚀运算完全一致。
 
 `getStructuringElement` 返回指定形状和尺寸的结构元素（内核矩阵）
 第一个参数指定形状：
+
 * 矩形: MORPH_RECT
+
 * 交叉形: MORPH_CROSS
+
 * 椭圆形: MORPH_ELLIPSE
+
 第二个第三个参数分别是内核的尺寸以及锚点的位置。锚点位置一般默认为（-1，-1）即中心。
 
 `Mat element = getStructuringElement(MORPH_RECT, Size(x, y), Point(x, y));//获取自定义核`
@@ -199,6 +245,7 @@ __dst = src1[I]*alpha+ src2[I]*beta + gamma;__
 
 #### 线性滤波
 * 线性滤波器：线性滤波器经常用于剔除输入信号中不想要的频率或者从许多频率中选择一个想要的频率。
+
 * 邻域算子（局部算子）是利用给定像素周围的像素值的决定此像素的最终输出值的一种算子。
 
 ##### 均值滤波
@@ -208,19 +255,29 @@ __dst = src1[I]*alpha+ src2[I]*beta + gamma;__
 
 `void blur(InputArray src, OutputArraydst, Size ksize, Point anchor=Point(-1,-1), int borderType=BORDER_DEFAULT ) `
 * *src*，输入图像，即源图像，填Mat类的对象即可。该函数对通道是独立处理的，且可以处理任意通道数的图片，待处理的图片深度应该为CV_8U, CV_16U, CV_16S, CV_32F 以及 CV_64F之一。
+
 * *dst*，即目标图像，需要和源图片有一样的尺寸和类型。比如可以用Mat::Clone，以源图片为模板，来初始化得到如假包换的目标图。
+
 * *ksize*，内核的大小。一般这样写Size( w,h )来表示内核的大小( 其中，w 为像素宽度， h为像素高度)。Size（3,3）就表示3x3的核大小，Size（5,5）就表示5x5的核大小
+
 * *anchor*，表示锚点（即被平滑的那个点），注意他有默认值Point(-1,-1)。如果这个点坐标是负值的话，就表示取核的中心为锚点，所以默认值Point(-1,-1)表示这个锚点在核的中心。
+
 * *borderType*，用于推断图像外部像素的某种边界模式。有默认值BORDER_DEFAULT，我们一般不去管它。
 
 ##### 方框滤波
 `void boxFilter(InputArray src,OutputArray dst, int ddepth, Size ksize, Point anchor=Point(-1,-1), boolnormalize=true, int borderType=BORDER_DEFAULT )`
 * *src*，输入图像，即源图像，填Mat类的对象即可。该函数对通道是独立处理的，且可以处理任意通道数的图片，待处理的图片深度应该为CV_8U, CV_16U, CV_16S, CV_32F 以及 CV_64F之一。
+
 * *dst*，即目标图像，需要和源图片有一样的尺寸和类型。
+
 * *ddepth*，输出图像的深度，-1代表使用原图深度，即src.depth()。
+
 * *ksize*，内核的大小。一般这样写Size( w,h )来表示内核的大小( 其中，w 为像素宽度， h为像素高度)。Size（3,3）就表示3x3的核大小，Size（5,5）就表示5x5的核大小
+
 * *anchor*，表示锚点（即被平滑的那个点），注意他有默认值Point(-1,-1)。如果这个点坐标是负值的话，就表示取核的中心为锚点，所以默认值Point(-1,-1)表示这个锚点在核的中心。
+
 * *normalize*，默认值为true，一个标识符，表示内核是否被其区域归一化（normalized）了。
+
 * *borderType*，用于推断图像外部像素的某种边界模式。有默认值BORDER_DEFAULT，我们一般不去管它。
 
 当normalize=true的时候，方框滤波就变成了我们熟悉的均值滤波。也就是说，均值滤波是方框滤波归一化（normalized）后的特殊情况。而非归一化（Unnormalized）的方框滤波用于计算每个像素邻域内的积分特性，比如密集光流算法（dense optical flow algorithms）中用到的图像倒数的协方差矩阵（covariance matrices of image derivatives）
@@ -229,10 +286,15 @@ __dst = src1[I]*alpha+ src2[I]*beta + gamma;__
 高斯滤波是一种线性平滑滤波，适用于消除高斯噪声。
 `void GaussianBlur(InputArray src,OutputArray dst, Size ksize, double sigmaX, double sigmaY=0, intborderType=BORDER_DEFAULT )`
 * *src*，输入图像，即源图像，填Mat类的对象即可。它可以是单独的任意通道数的图片，但需要注意，图片深度应该为CV_8U,CV_16U, CV_16S, CV_32F 以及 CV_64F之一。
+
 * *dst*，即目标图像，需要和源图片有一样的尺寸和类型。比如可以用Mat::Clone，以源图片为模板，来初始化得到如假包换的目标图。
+
 * *ksize*，其中ksize.width和ksize.height可以不同，但他们都必须为正数和奇数。或者，它们可以是零的，值由sigma计算而来。
+
 * *sigmaX*，表示高斯核函数在X方向的的标准偏差。
+
 * *sigmaY*，表示高斯核函数在Y方向的的标准偏差。若sigmaY为零，就将它设为sigmaX，如果sigmaX和sigmaY都是0，那么就由ksize.width和ksize.height计算出来。为了结果的正确性，最好是把Size，sigmaX和sigmaY全部指定到。
+
 * *borderType*，用于推断图像外部像素的某种边界模式。有默认值BORDER_DEFAULT，我们一般不去管它。
 
 #### 非线性滤波
@@ -242,13 +304,16 @@ __dst = src1[I]*alpha+ src2[I]*beta + gamma;__
 
 与均值滤波的比较：
 * 优势：在均值滤波器中，由于噪声成分被放入平均计算中，所以输出受到了噪声的影响，但是在中值滤波器中，由于噪声成分很难选上，所以几乎不会影响到输出。因此同样用3x3区域进行处理，中值滤波消除的噪声能力更胜一筹。中值滤波无论是在消除噪声还是保存边缘方面都是一个不错的方法。
+
 * 劣势：中值滤波花费的时间是均值滤波的5倍以上。
 
 中值滤波在一定条件下，可以克服线性滤波器（如均值滤波等）所带来的图像细节模糊，而且对滤除脉冲干扰即图像扫描噪声最为有效。在实际运算过程中并不需要图像的统计特性，也给计算带来不少方便。但是对一些细节多，特别是线、尖顶等细节多的图像不宜采用中值滤波。
 
 `void medianBlur(InputArray src,OutputArray dst, int ksize)`
 * *src*，函数的输入参数，填1、3或者4通道的Mat类型的图像；当ksize为3或者5的时候，图像深度需为CV_8U，CV_16U，或CV_32F其中之一，而对于较大孔径尺寸的图片，它只能是CV_8U。
+
 * *dst*，即目标图像，函数的输出参数，需要和源图片有一样的尺寸和类型。我们可以用Mat::Clone，以源图片为模板，来初始化得到如假包换的目标图。
+
 * *ksize*，孔径的线性尺寸（aperture linear size），注意这个参数必须是大于1的奇数，比如：3，5，7，9 ...
 
 ##### 双边滤波
@@ -258,8 +323,12 @@ __dst = src1[I]*alpha+ src2[I]*beta + gamma;__
 
 `void bilateralFilter(InputArray src, OutputArraydst, int d, double sigmaColor, double sigmaSpace, int borderType=BORDER_DEFAULT)`
 * *src*，输入图像，即源图像，需要为8位或者浮点型单通道、三通道的图像。
+
 * *dst*，即目标图像，需要和源图片有一样的尺寸和类型。
+
 * *d*，表示在过滤过程中每个像素邻域的直径。如果这个值我们设其为非正数，那么OpenCV会从第五个参数sigmaSpace来计算出它来。
+
 * *sigmaColor*，颜色空间滤波器的sigma值。这个参数的值越大，就表明该像素邻域内有更宽广的颜色会被混合到一起，产生较大的半相等颜色区域。
 sigmaSpace坐标空间中滤波器的sigma值，坐标空间的标注方差。他的数值越大，意味着越远的像素会相互影响，从而使更大的区域足够相似的颜色获取相同的颜色。当d>0，d指定了邻域大小且与sigmaSpace无关。否则，d正比于sigmaSpace。
+
 * *borderType*，用于推断图像外部像素的某种边界模式。注意它有默认值BORDER_DEFAULT。
