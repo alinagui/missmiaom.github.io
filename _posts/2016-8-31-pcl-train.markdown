@@ -6,7 +6,8 @@ date:       2016-08-31
 author:     "Leiym"
 header-img: "img/post-bg-2015.jpg"
 tags:
-    - PCL vslam
+    - PCL
+    - vslam
 ---
 
 ### 开发环境
