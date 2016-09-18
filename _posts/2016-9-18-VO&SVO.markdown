@@ -21,7 +21,7 @@ tags:
 
 #### 基础知识
 
-* 透视投影模型
+* 透视投影模型 [相机模型](http://missmiaom.github.io/pdf/camera_model.pdf)
 
 * 极线约束（epipolar constraint）[wiki——极限约束](https://en.wikipedia.org/wiki/Epipolar_geometry)
 
