@@ -74,7 +74,7 @@ tags:
 
 ** 增量式的计算相机路径（pose by pose）**
 
-![VO计算流程图](img/VO计算流程图.png)
+  <img src="http://leiym.com/img/in-post/SLAM/VO计算流程图.png"/>
 
 ##### 图像特征
 
