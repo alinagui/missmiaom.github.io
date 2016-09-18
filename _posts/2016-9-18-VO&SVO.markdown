@@ -21,9 +21,9 @@ tags:
 
 #### 基础知识
 
-* 透视投影模型 [相机模型](http://missmiaom.github.io/pdf/camera_model.pdf)
+* 透视投影模型 [相机模型](www.leiym.com/pdf/camera_model.pdf)
 
-* 极线约束（epipolar constraint）[wiki——极限约束](https://en.wikipedia.org/wiki/Epipolar_geometry)
+* 极线约束（epipolar constraint）[维基百科——极线约束](https://en.wikipedia.org/wiki/Epipolar_geometry)
 
 #### VO的通常计算过程
 
