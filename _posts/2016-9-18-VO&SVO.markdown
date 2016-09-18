@@ -1,0 +1,317 @@
+---
+layout:     post
+title:      "VO&SVO技术总览"
+subtitle:   " \"SLAM\""
+date:       2016-09-17
+author:     "Leiym"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - vslam
+---
+
+> 博客记录了浙大刘勇教授在2016年国防科大暑期学校的SLAM专题讲座内容，并附带了相关资源链接。
+
+### 视觉里程估计 VO
+
+* VO只关注轨迹的局部一致性
+
+*  SLAM同事关注地图与轨迹的全局一致性
+
+*  VO牺牲一致性换取实时性
+
+#### 基础知识
+
+* 透视投影模型
+
+* 极线约束（epipolar constraint）[wiki——极限约束](https://en.wikipedia.org/wiki/Epipolar_geometry)
+
+#### VO的通常计算过程
+
+1. 估计两相邻图像帧之间的相对运动
+
+2. 连接多帧获得连续运动轨迹
+
+3. 采用pose graph或者bundle Adjustment优化最近m个相机姿态，获得较好的最近局部轨迹
+
+#### VO计算的前端和后端
+
+* 前端（front-end）
+
+    * 特征提取 feature extracting
+
+    * 特征匹配 feature matching
+
+    * 外点剔除 outliner removal
+
+    * 闭环检测 loop closure detection
+
+* 后端（back-end）
+
+  * 位姿（pose）与结构（structure）的优化
+
+#### 相对运动估计
+
+##### 基于特征的VO估计方法
+
+* 提取两帧的特征（RANSAC剔除外点）
+
+* 最小化重投影误差
+
+##### 基于直接VO估计方法
+
+*  最小化光度测量误差（photometric error）
+
+##### 比较
+
+| 基于特征的VO方法|直接VO方法 |
+|:---:|:---:|
+|支持大帧间运动|图像中的所有信息都会被用到（精确，鲁棒）|
+|高效率实时优化获得结构与运动|提高帧率可降低平均每帧的计算代价|
+|特征提取和匹配导致效率低|仅支持有限的帧间运动|
+|可能匹配到外点|联合优化稠密的结构运动序列代价太高|
+
+#### VO计算流程图
+
+** 增量式的计算相机路径（pose by pose）**
+
+![VO计算流程图](img/VO计算流程图.png)
+
+##### 图像特征
+
+* 至少需要5对特征点对完成两帧之间的运动估计
+
+  * 检测出显著特征点（detector）
+
+  * 从不同图像中检测到相同显著特征点，**需要重复性高的检测算子（detector）**
+
+  * 获得足够信息识别另一帧图像中的同一个点，**需要区分性强的描述算子（descriptor）**
+
+延伸阅读： [Performance evaluation of
+feature detection and matching in stereo visual
+odometry](www.baidu.com)
+
+##### 特征检测匹配加速策略
+
+* 特征检测与匹配通常是VO的计算瓶颈：
+
+  * 每帧执行100+次
+
+* 解决思路：限制搜索区间
+
+  * 应用运动模型估计（IMU或GPS估算）
+
+  * 金字塔搜索：低分辨率图像中粗匹配，高分辨率图像中精确定位
+
+##### 鲁棒的特征检测匹配
+
+* 特征匹配的准确性直接关系到运动估计的精度
+
+  * 需要进行模型拟合及外点剔除
+
+* RANSAC算法（Random Sample Consensus）
+
+  1. 随机选取N个数据
+
+  2. 选用待估计模型（线性或非线性最小二乘等）进行参数估计
+
+  3. 计算符合待估计模型（满足一定的误差冗余度T）的数据点数k，如果k是目前最大的，接受当前确定的模型
+
+  4. 重复上述步骤S次
+
+##### 运动估计
+
+* 2D-2D ：从图像匹配点对中估计运动
+
+  * 匹配的点对都是2D图像点
+
+  * 求解过程最小化投影误差（最少需5个点对）
+
+  * 可采用8点法，5点法
+
+* 3D-2D ： 从图像点与3D结构点对中估计运动
+
+  * 也称为PnP问题，最少需3个点对
+
+  * 求解过程最小化投影误差
+
+* 3D-3D : 从三维结构点对中估计运动（点云注册）
+
+  * 常用于立体视觉VO中，最少需要3对非共线的点对
+
+  * 求解过程最小化如下三维欧式距离
+
+  * 常用算法：ICP，BA，全局注册法
+
+**运动估计方法小结**
+
+|估计方法|单目VO|双目VO|
+|:---:|:---:|:---:|
+|2D-2D|√|√|
+|3D-3D| |√|
+|3D-2D|√|√|
+
+##### 位姿-图（pose-graph）优化
+
+* 目前为止仅考虑连续帧间的运动估计
+
+  ![VO计算流程图](img/位姿图.png)
+
+* 非相邻帧间的运动也可以进行估计，只要共同的特征还可以被观测到，因此可以用这些帧作为额外的约束以提高相机位姿精度，如下：
+
+  ![VO计算流程图](img/图优化.png)
+
+* 仅考虑最近的m帧，通常采用高斯-牛顿，L-M，大图优化采用优化工具g2o，GTSAM，Google Ceres
+
+##### 集束调整（Bundle Adjustment）
+
+  ![VO计算流程图](img/集束调整.png)
+
+* 类似于位姿图优化，但是同时优化3D点
+
+* 为了不陷入局部最小，需给一个较为接近最小值的初值
+
+* 可采用高斯-牛顿，L-M，更高效的大图优化采用优化工具，g2o，GTSAM，Google Ceres
+
+##### Bundle Adjustment vs Pose-graph Optimization
+
+* BA 由于增加了landmark点的约束，比pose-graph优化更精确
+
+* BA计算代价（O(qM+kN)^3）高于Pose-graph优化，其中N是特征点数，M是相机位姿数，q是特征点的参数数，k是相机的参数数。
+
+  * 小窗口范围的BA可以取得实时计算效果
+
+  * 可采用landmark点参数固定，仅优化相机位姿的方法降低计算复度（motion-only BA）
+
+---
+
+### 立体视觉里程估计 SVO
+
+#### SVO的通常计算过程
+
+1. 获得左右图像、图像校正
+
+2. 提取图像特征点
+
+3. 左右图像特征匹配、获取特征点坐标
+
+4. 前后图像特征匹配
+
+5. 增量式的运动估计
+
+#### 提取图像特征点
+
+  ![VO计算流程图](img/检测子表现.png)
+
+#### 左右图像特征匹配、获取特征点坐标
+
+对于校正的左右图像，其基线是水平的，选取左图特征点临近的N*N个像素组成patch，进行相似性检验
+
+  ![VO计算流程图](img/立体匹配.png)
+
+#### 增量式的运动估计
+
+根据匹配后的特征点和特征点的坐标，恢复两个时刻相机的运动在匹配过程中，存在大量的误匹配，需要用RANSAC（MLESAC）！
+
+* 从M中选取3个点对
+
+* 由3个点对估计参数
+
+* 根据估计参数得到的模型计算误差，如果小于给定误差，则认为是inlier
+
+* 重复S次，找到inliers最大的点集
+
+* 对该点集进行计算，得到最终T
+
+---
+
+### 视觉里程计讲解
+
+#### VISO2-S -- StereoScan: Dense 3d Reconstruction in Real-time IV 2011
+
+##### 主要流程
+
+  ![VO计算流程图](img/viso2主要流程.png)
+
+  ![VO计算流程图](img/viso2-1.png)
+
+  ![VO计算流程图](img/viso2-2.png)
+
+#### SSLAM  -- Robust Selective Stereo SLAM without Loop Closure and Bundle Adjustment ICIAP 2013
+
+  ![VO计算流程图](img/SSLAM.png)
+
+#### 2FO-CC -- Improving the Egomotion Estimation by Correcting the Calibration Bias VISAPP 2015
+
+  ![VO计算流程图](img/2FO-CC.png)
+
+#### MFI -- Visual Odometry by Multi-frame Feature Integration. ICCV2013
+
+  ![VO计算流程图](img/MFI-1.png)
+
+  ![VO计算流程图](img/MFI-2.png)
+
+#### SOFT -- Stereo odometry based on careful feature selection and tracking ECMR , 2015
+
+  ![VO计算流程图](img/SOFT.png)
+
+---
+
+### 常用开源系统与算法
+
+#### 开源视觉里程计算法:
+
+* Modified PTAM: (feature-based, mono):
+
+  http://wiki.ros.org/ethzasl_ptam
+
+* LIBVISO2 (feature-based, mono and stereo):
+
+  http://www.cvlibs.net/software/libviso
+
+* SVO (semi-direct, mono, stereo, multi-cameras):
+
+  https://github.com/uzh-rpg/rpg_svo
+
+* 更多开源算法:
+
+  http://www.cvlibs.net/datasets/kitti/eval_odometry.php
+
+#### 开源优化算法:
+
+* GTSAM: https://collab.cc.gatech.edu/borg/gtsam
+
+* G2o: https://openslam.org/g2o.htm
+
+* Google Ceres Solver: http://ceres-solver.org/
+
+#### 公开数据集
+
+* KITTI: http://www.cvlibs.net/datasets/kitti/
+
+* TUM:https://vision.in.tum.de/data/datasets/rgbd-dataset/download
+
+* NYU Depth: http://cs.nyu.edu/~silberman/datasets/
+
+* Collection of MRPT: http://www.mrpt.org/robotics_datasets
+
+* ASL Dataset: http://projects.asl.ethz.ch/datasets/doku.php?id=home
+
+---
+
+### 总结与展望
+
+* VO可估计机器人6DoF姿态和轨迹
+
+* VO基本流程
+
+  * 特征提取/匹配
+
+  * 运动估计：2D-2D/ 3D-3D/ 3D-2D
+
+  * 局部优化：g2o, BA
+
+  * VO局限
+
+* 鲁棒性受到图像质量影响（光照，运动目标，模糊，遮挡等）
+
+* 计算实时性与精度的折中
