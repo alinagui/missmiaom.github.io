@@ -90,7 +90,7 @@ tags:
 feature detection and matching in stereo visual
 odometry](www.baidu.com)
 
-##### 特征检测匹配加速策略
+##### 特征检测匹配加速策略
 
 * 特征检测与匹配通常是VO的计算瓶颈：
 
@@ -154,17 +154,17 @@ odometry](www.baidu.com)
 
 * 目前为止仅考虑连续帧间的运动估计
 
-  ![VO计算流程图](img/位姿图.png)
+  <img src="http://leiym.com/img/in-post/SLAM/位姿图.png"/>
 
 * 非相邻帧间的运动也可以进行估计，只要共同的特征还可以被观测到，因此可以用这些帧作为额外的约束以提高相机位姿精度，如下：
 
-  ![VO计算流程图](img/图优化.png)
+  <img src="http://leiym.com/img/in-post/SLAM/图优化.png"/>
 
 * 仅考虑最近的m帧，通常采用高斯-牛顿，L-M，大图优化采用优化工具g2o，GTSAM，Google Ceres
 
 ##### 集束调整（Bundle Adjustment）
 
-  ![VO计算流程图](img/集束调整.png)
+  <img src="http://leiym.com/img/in-post/SLAM/集束调整.png"/>
 
 * 类似于位姿图优化，但是同时优化3D点
 
@@ -200,13 +200,13 @@ odometry](www.baidu.com)
 
 #### 提取图像特征点
 
-  ![VO计算流程图](img/检测子表现.png)
+  <img src="http://leiym.com/img/in-post/SLAM/检测子表现.png"/>
 
 #### 左右图像特征匹配、获取特征点坐标
 
 对于校正的左右图像，其基线是水平的，选取左图特征点临近的N*N个像素组成patch，进行相似性检验
 
-  ![VO计算流程图](img/立体匹配.png)
+  <img src="http://leiym.com/img/in-post/SLAM/立体匹配.png"/>
 
 #### 增量式的运动估计
 
@@ -230,29 +230,29 @@ odometry](www.baidu.com)
 
 ##### 主要流程
 
-  ![VO计算流程图](img/viso2主要流程.png)
+  <img src="http://leiym.com/img/in-post/SLAM/viso2主要流程.png"/>
 
-  ![VO计算流程图](img/viso2-1.png)
+  <img src="http://leiym.com/img/in-post/SLAM/viso2-1.png"/>
 
-  ![VO计算流程图](img/viso2-2.png)
+  <img src="http://leiym.com/img/in-post/SLAM/viso2-2.png"/>
 
 #### SSLAM  -- Robust Selective Stereo SLAM without Loop Closure and Bundle Adjustment ICIAP 2013
 
-  ![VO计算流程图](img/SSLAM.png)
+  <img src="http://leiym.com/img/in-post/SLAM/SSLAM.png"/>
 
 #### 2FO-CC -- Improving the Egomotion Estimation by Correcting the Calibration Bias VISAPP 2015
 
-  ![VO计算流程图](img/2FO-CC.png)
+  <img src="http://leiym.com/img/in-post/SLAM/2FO-CC.png"/>
 
 #### MFI -- Visual Odometry by Multi-frame Feature Integration. ICCV2013
 
-  ![VO计算流程图](img/MFI-1.png)
+  <img src="http://leiym.com/img/in-post/SLAM/MFI-1.png"/>
 
-  ![VO计算流程图](img/MFI-2.png)
+  <img src="http://leiym.com/img/in-post/SLAM/MFI-2.png"/>
 
 #### SOFT -- Stereo odometry based on careful feature selection and tracking ECMR , 2015
 
-  ![VO计算流程图](img/SOFT.png)
+  <img src="http://leiym.com/img/in-post/SLAM/SOFT.png"/>
 
 ---
 
