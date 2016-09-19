@@ -7,64 +7,45 @@ author:     "Leiym"
 header-img: "img/post-bg-2015.jpg"
 tags:
     - opencv
-    - vslam
 ---
 
-<!-- MarkdownTOC -->
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [opencv2 结构](#opencv2-结构)
-- [操作图片](#操作图片)
-	- [显示图像](#显示图像)
-	- [写入图像](#写入图像)
-	- [创建图像](#创建图像)
-	- [复制图像](#复制图像)
-	- [操作像素点](#操作像素点)
-	- [设定一幅图像的ROI区域](#设定一幅图像的roi区域)
-	- [图像算术运算](#图像算术运算)
-	- [颜色空间转换](#颜色空间转换)
-	- [计算直方图](#计算直方图)
-	- [阈值化](#阈值化)
-	- [线性混合](#线性混合)
-	- [轨迹条](#轨迹条)
-- [形态学基本操作](#形态学基本操作)
-		- [腐蚀运算](#腐蚀运算)
-		- [膨胀运算](#膨胀运算)
-		- [开运算，闭运算，形态学梯度](#开运算，闭运算，形态学梯度)
-- [图像滤波](#图像滤波)
-	- [线性滤波](#线性滤波)
-		- [均值滤波](#均值滤波)
-		- [方框滤波](#方框滤波)
-		- [高斯滤波](#高斯滤波)
-	- [非线性滤波](#非线性滤波)
-		- [中值滤波](#中值滤波)
-		- [双边滤波](#双边滤波)
-- [边缘检测](#边缘检测)
-	- [边缘检测步骤：](#边缘检测步骤：)
-	- [边缘检测评价标准](#边缘检测评价标准)
-	- [canny 算子](#canny-算子)
-	- [sobel 算子](#sobel-算子)
-	- [Laplace 算子](#laplace-算子)
-	- [scharr 滤波器](#scharr-滤波器)
-- [特征点检测和图像匹配](#特征点检测和图像匹配)
-	- [特征检测子（关键点）与描述子](#特征检测子（关键点）与描述子)
-	- [特征检测子公用接口](#特征检测子公用接口)
-		- [class KeyPoint](#class-keypoint)
-		- [FeatureDetector](#featuredetector)
-	- [特征描述子提取公用接口](#特征描述子提取公用接口)
-		- [DescriptorExtractor](#descriptorextractor)
-	- [特征描述子匹配公用接口](#特征描述子匹配公用接口)
-		- [class DMatch](#class-dmatch)
-		- [DescriptorMatcher](#descriptormatcher)
-		- [BruteForceMatcher](#bruteforcematcher)
-		- [FlannBasedMatcher](#flannbasedmatcher)
-	- [通用特征描述子匹配公用接口](#通用特征描述子匹配公用接口)
-	- [图像特征关键点及关键点匹配绘制函数](#图像特征关键点及关键点匹配绘制函数)
-		- [drawMatches](#drawmatches)
-		- [drawKeypoints](#drawkeypoints)
+		- [opencv2 结构](#opencv2-结构)
+		- [操作图片](#操作图片)
+			- [显示图像](#显示图像)
+			- [写入图像](#写入图像)
+			- [创建图像](#创建图像)
+			- [复制图像](#复制图像)
+			- [操作像素点](#操作像素点)
+			- [设定一幅图像的ROI区域](#设定一幅图像的roi区域)
+			- [图像算术运算](#图像算术运算)
+			- [颜色空间转换](#颜色空间转换)
+			- [计算直方图](#计算直方图)
+			- [阈值化](#阈值化)
+			- [线性混合](#线性混合)
+			- [轨迹条](#轨迹条)
+		- [形态学基本操作](#形态学基本操作)
+				- [腐蚀运算](#腐蚀运算)
+				- [膨胀运算](#膨胀运算)
+				- [开运算，闭运算，形态学梯度](#开运算闭运算形态学梯度)
+		- [图像滤波](#图像滤波)
+			- [线性滤波](#线性滤波)
+				- [均值滤波](#均值滤波)
+				- [方框滤波](#方框滤波)
+				- [高斯滤波](#高斯滤波)
+			- [非线性滤波](#非线性滤波)
+				- [中值滤波](#中值滤波)
+				- [双边滤波](#双边滤波)
+		- [边缘检测](#边缘检测)
+			- [边缘检测步骤：](#边缘检测步骤)
+			- [边缘检测评价标准](#边缘检测评价标准)
+			- [canny](#canny)
+			- [sobel](#sobel)
+			- [Laplace](#laplace)
+			- [scharr](#scharr)
 
-<!-- /MarkdownTOC -->
-
-
+<!-- /TOC -->
 
 ### opencv2 结构
 *core*        :定义了基本数据结构，包括最重要的Mat和一些其他的模块
@@ -407,7 +388,7 @@ sigmaSpace坐标空间中滤波器的sigma值，坐标空间的标注方差。�
 
 * 最小响应: 图像中的边缘只能标识一次，并且可能存在的图像噪声不应标识为边缘。
 
-#### canny 算子
+#### canny
 
 1. 消除噪声。一般情况下，使用高斯平滑滤波器卷积降噪。
 
@@ -441,7 +422,7 @@ sigmaSpace坐标空间中滤波器的sigma值，坐标空间的标注方差。�
 
 **注意** ：阈值1和阈值2两者的小者用于边缘连接，而大者用来控制强边缘的初始段，推荐的高低阈值比在2:1到3:1之间。
 
-#### sobel 算子
+#### sobel
 
 Sobel 算子是一个主要用作边缘检测的离散微分算子。 它Sobel算子结合了高斯平滑和微分求导，用来计算图像灰度函数的近似梯度。在图像的任何一点使用此算子，将会产生对应的梯度矢量或是其法矢量。
 
@@ -461,7 +442,7 @@ Sobel 算子是一个主要用作边缘检测的离散微分算子。 它Sobel�
 
 * *scale*，计算导数值时可选的缩放因子，默认值是1，表示默认情况下是没有应用缩放的。
 
-#### Laplace 算子
+#### Laplace
 
 Laplacian 算子是n维欧几里德空间中的一个二阶微分算子，定义为梯度grad（）的散度div（）。因此如果f是二阶可微的实函数，则f的拉普拉斯算子定义为：
 
@@ -489,7 +470,7 @@ tips：让一幅图像减去它的Laplacian可以增强对比度。
 
 * *borderType*，边界模式，默认值为BORDER_DEFAULT。这个参数可以在官方文档中borderInterpolate()处得到更详细的信息。
 
-#### scharr 滤波器
+#### scharr
 
 当内核大小为 3 时, Sobel内核可能产生比较明显的误差(毕竟，Sobel算子只是求取了导数的近似值而已)。 为解决这一问题，OpenCV提供了Scharr 函数，但该函数仅作用于大小为3的内核。该函数的运算与Sobel函数一样快，但结果却更加精确。
 
@@ -516,306 +497,3 @@ tips：让一幅图像减去它的Laplacian可以增强对比度。
 `Scharr(src, dst, ddepth, dx, dy, scale,delta, borderType);`
 
 `Sobel(src, dst, ddepth, dx, dy, CV_SCHARR,scale, delta, borderType);`
-
-### 特征点检测和图像匹配
-
-角点匹配可以分为以下四个步骤：
-
-	1. 提取检测子：在两张待匹配的图像中寻找那些最容易识别的像素点（角点），比如纹理丰富的物体边缘点等。
-
-	2. 提取描述子：对于检测出的角点，用一些数学上的特征对其进行描述，如梯度直方图，局部随机二值特征等。
-
-		检测子和描述子的常用提取方法有:sift, harris, surf, fast, agast, brisk, freak, brisk,orb等。
-
-	3. 匹配：通过各个角点的描述子来判断它们在两张图像中的对应关系。常用方法如 flann
-
-	4. 去外点：去除错误匹配的外点，保留正确的内点。常用方法有Ransac, GTM。
-
-#### 特征检测子（关键点）与描述子
-
-#### 特征检测子公用接口
-
-OpenCV封装了一些特征检测子(特征点)算法，使得用户能够解决该问题时候方便使用各种算法。这章用来计算的描述子匹配被表达成一个高维空间的向量 vector。所有实现 vector 特征关键点检测子部分继承了 FeatureDetector 接口。
-
-##### class KeyPoint
-
-数据结构如下：
-
-    Point2f pt 			//特征点的坐标
-
-    float size 			//特征点的直径
-
-    float angle			//特征点的方向，[0,360)，（-1代表不可用）
-
-    float response		//特征点的可靠度
-
-    int octave			//特征点所在的图像金字塔的组
-
-    int class_id		//用于聚类的id
-
-##### FeatureDetector
-
-`void FeatureDetector::detect(const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask=Mat() ) const`
-
-* *image* – Image.
-
-* *mask* – Mask specifying where to look for keypoints (optional). It must be a 8-bit integer matrix with non-zero values in the region of interest.
-
-
-`void FeatureDetector::detect(const vector<Mat>& images, vector<vector<KeyPoint>>& keypoints, const vector<Mat>& masks=vector<Mat>() ) const`
-
-* *images* – Image set.
-
-* *keypoints* – The detected keypoints. In the second variant of the method keypoints[i] is a set of keypoints detected in images[i] .
-
-* *masks* – Masks for each input image specifying where to look for keypoints (optional). masks[i] is a mask for images[i].
-
-`Ptr<FeatureDetector> FeatureDetector::create(const string& detectorType)`
-
-* *Parameters* — detectorType – Feature detector type.
-
-The following detector types are supported:
-
-    "FAST" – FastFeatureDetector
-    "STAR" – StarFeatureDetector
-    "SIFT" – SiftFeatureDetector
-    "SURF" – SurfFeatureDetector
-    "ORB" – OrbFeatureDetector
-    "MSER" – MserFeatureDetector
-    "GFTT" – GoodFeaturesToTrackDetector
-    "HARRIS" – GoodFeaturesToTrackDetector with Harris detector enabled
-    "Dense" – DenseFeatureDetector
-    "SimpleBlob" – SimpleBlobDetector
-
-Also a combined format is supported: feature detector adapter name ( "Grid" – GridAdaptedFeatureDetector, "Pyramid" – PyramidAdaptedFeatureDetector ) + feature detector name , for example: "GridFAST", "PyramidSTAR" .
-
-
-```
-FastFeatureDetector				//用:ocv:func:FAST 方法封装的特征检测子的类
-
-GoodFeaturesToTrackDetector		//用 goodFeaturesToTrack() 函数实现的特征检测子封装类
-
-MserFeatureDetector				//用 MSER 函数实现的特征检测子封装类.
-
-StarFeatureDetector				//用 StarDetector 函数实现的特征检测子封装类
-
-SiftFeatureDetector				//用 SIFT 函数实现的特征检测子封装类
-
-SurfFeatureDetector				//用 SURF 函数实现的特征检测子封装类
-
-OrbFeatureDetector				//用 ORB 函数实现的特征检测子封装类
-
-```
-
-#### 特征描述子提取公用接口
-
-OpenCV封装了一些特征描述子提取算法，使得用户能够解决该问题时候方便使用各种算法。这章用来计算的描述子提取被表达成一个高维空间的向量 vector。所有实现 vector 特征描述子子提取的部分继承了 DescriptorExtractor 接口。
-
-##### DescriptorExtractor
-
-在这个接口中, 一个关键点的特征描述子可以被表达成密集(dense)，固定维数的向量。 大部分特征描述子按照这种模式每隔固定个像素计算。特征描述子的集合被表达成 Mat , 其中每一行是一个关键的特征描述子。
-
-`void DescriptorExtractor::compute(const Mat& image, vector<KeyPoint>& keypoints, Mat& descriptors) const`
-
-* *image* — 图像。
-
-* *keypoints* — 输入的特征关键点。不能被计算特征描述子的关键点被略过。
-
-* *descriptors*  – 计算特征描述子。
-
-`Ptr<DescriptorExtractor> DescriptorExtractor::create(const string& descriptorExtractorType)`
-
-* *descriptorExtractorType* – Descriptor extractor type.
-
-	现有实现支持以下几个类型的特征描述子提取方法:
-
-	"SIFT" – SiftDescriptorExtractor
-
-	"SURF" – SurfDescriptorExtractor
-
-	"ORB" – OrbDescriptorExtractor
-
-	"BRIEF" – BriefDescriptorExtractor
-
-
-```
-SiftDescriptorExtractor				//应用:ocv:class:SIFT 来封装的用于计算特征描述子的类.
-
-SurfDescriptorExtractor				//应用:ocv:class:SURF 来封装的用于计算特征描述子的类.
-
-OrbDescriptorExtractor				//应用:ocv:class:ORB 来封装的用于计算特征描述子的类.
-
-CalonderDescriptorExtractor			//应用:ocv:class:RTreeClassifier 来封装的用于计算特征描述子的类.
-
-OpponentColorDescriptorExtractor	//实现了在d对立颜色空间(Opponent Color Space)中计算特征描述子的类. 
-
-BriefDescriptorExtractor			//计算BRIEF描述子的类.
-```
-
-#### 特征描述子匹配公用接口
-
-##### class DMatch
-
-用于匹配特征关键点的特征描述子的类：查询特征描述子索引, 特征描述子索引, 训练图像索引, 以及不同特征描述子之间的距离。
-
-##### DescriptorMatcher
-
-用于特征关键点描述子匹配的抽象基类。有两类匹配任务：匹配两个图像之间的特征描述子，或者匹配一个图像集与另外一个图像集的特征描述子。
-
-`void DescriptorMatcher::add(const vector<Mat>& descriptors)`
-
-增加特征描述子用于特征描述子集训练。
-
-* *descriptors* – Descriptors to add.
-
-`const vector<Mat>& DescriptorMatcher::getTrainDescriptors() const`
-
-对于特征描述子训练集 trainDescCollection 返回一个值。
-
-`void DescriptorMatcher::clear()`
-
-清空特征描述子训练集。
-
-`bool DescriptorMatcher::empty() const`
-
-返回真，如果特征描述子匹配中没有训练的特征描述子。
-
-`bool DescriptorMatcher::isMaskSupported()`
-
-返回真，如果特征描述子匹配不支持 masking permissible matches。
-
-`void DescriptorMatcher::train()`
-
-训练一个特征描述子匹配。
-
-`void DescriptorMatcher::match(const Mat& queryDescriptors, const Mat& trainDescriptors, vector<DMatch>& matches, const Mat& mask=Mat() ) const`
-
-`void DescriptorMatcher::match(const Mat& queryDescriptors, vector<DMatch>& matches, const vector<Mat>& masks=vector<Mat>() )`
-
-* *queryDescriptors* – 特征描述子查询集.
-
-* *trainDescriptors* – 待训练的特征描述子集. 这个集没被加载到类的对象中.
-
-* *matches* – Matches. matches 尺寸小雨超汛特征描述子的数量.
-
-* *mask* – 特定的在输入查询和训练特征描述子集之间的Mask permissible匹配.
-
-* *masks* – masks集. 每个 masks[i] 特定标记出了在输入查询特征描述子和存储的从第i个图像中提取的特征描述子集 trainDescCollection[i] .
-
-`void DescriptorMatcher::knnMatch(const Mat& queryDescriptors, const Mat& trainDescriptors, vector<vector<DMatch>>& matches, int k, const Mat& mask=Mat(), bool compactResult=false ) const`
-
-`void DescriptorMatcher::knnMatch(const Mat& queryDescriptors, vector<vector<DMatch>>& matches, int k, const vector<Mat>& masks=vector<Mat>(), bool compactResult=false )`
-
-给定查询集合中的每个特征描述子，寻找 k个最佳匹配。
-
-* *queryDescriptors* – Query set of descriptors.
-
-* *trainDescriptors* – Train set of descriptors. This set is not added to the train descriptors collection stored in the class object.
-
-* *mask* – Mask specifying permissible matches between an input query and train matrices of descriptors.
-
-* *masks* – Set of masks. Each masks[i] specifies permissible matches between the input query descriptors and stored train descriptors from the i-th image trainDescCollection[i].
-
-* *matches* – Matches. Each matches[i] is k or less matches for the same query descriptor.
-
-* *k* – Count of best matches found per each query descriptor or less if a query descriptor has less than k possible matches in total.
-
-* *compactResult* – Parameter used when the mask (or masks) is not empty. If compactResult is false, the matches vector has the same size as queryDescriptors rows. If compactResult is true, the matches vector does not contain matches for fully masked-out query descriptors.
-
-`void DescriptorMatcher::radiusMatch(const Mat& queryDescriptors, const Mat& trainDescriptors, vector<vector<DMatch>>& matches, float maxDistance, const Mat& mask=Mat(), bool compactResult=false ) const`
-
-`void DescriptorMatcher::radiusMatch(const Mat& queryDescriptors, vector<vector<DMatch>>& matches, float maxDistance, const vector<Mat>& masks=vector<Mat>(), bool compactResult=false )`
-
-对于每一个查询特征描述子, 在特定距离范围内寻找特征描述子.
-
-* *queryDescriptors* – Query set of descriptors.
-
-* *trainDescriptors* – Train set of descriptors. This set is not added to the train descriptors collection stored in the class object.
-
-* *mask* – Mask specifying permissible matches between an input query and train matrices of descriptors.
-
-* *masks* – Set of masks. Each masks[i] specifies permissible matches between the input query descriptors and stored train descriptors from the i-th image trainDescCollection[i].
-
-* *matches* – Found matches.
-
-* *compactResult* – Parameter used when the mask (or masks) is not empty. If compactResult is false, the matches vector has the same size as queryDescriptors rows. If compactResult is true, the matches vector does not contain matches for fully masked-out query descriptors.
-
-* *maxDistance* – Threshold for the distance between matched descriptors.
-
-`Ptr<DescriptorMatcher> DescriptorMatcher::clone(bool emptyTrainData) const`
-
-拷贝匹配.
-
-* *emptyTrainData* – If emptyTrainData is false, the method creates a deep copy of the object, that is, copies both parameters and train data. If emptyTrainData is true, the method creates an object copy with the current parameters but with empty train data.
-
-`Ptr<DescriptorMatcher> DescriptorMatcher::create(const string& descriptorMatcherType)`
-
-对于给定参数，创建特征描述子匹配(使用默认的构造函数).
-
-* *descriptorMatcherType* – Descriptor matcher type. Now the following matcher types are supported:
-
-    BruteForce (it uses L2 )
-
-    BruteForce-L1
-
-    BruteForce-Hamming
-
-    BruteForce-HammingLUT
-
-    FlannBased
-
-##### BruteForceMatcher
-
-暴力搜索特征点匹配. 对于第一集合中的特征描述子, 这个匹配寻找了在第二个集合中最近的特征描述子. 这种特征描述子匹配支持 masking permissible特征描述子集合匹配.
-
-##### FlannBasedMatcher
-
-基于Flann的特征描述子匹配. 这个匹配通过 flann::Index_ 在 特征描述子集上训练以及调用最近邻算法寻找最佳的匹配. 因此, 在大量训练样本数据集上，这个匹配会比暴力寻找快. 因为 flann::Index 的原因， FlannBasedMatcher 不支持masking permissible特征描述子集合匹配.
-
-#### 通用特征描述子匹配公用接口
-
-#### 图像特征关键点及关键点匹配绘制函数
-
-##### drawMatches
-
-`void drawMatches(const Mat& img1, const vector<KeyPoint>& keypoints1, const Mat& img2, const vector<KeyPoint>& keypoints2, const vector<DMatch>& matches1to2, Mat& outImg, const Scalar& matchColor=Scalar::all(-1), const Scalar& singlePointColor=Scalar::all(-1), const vector<char>& matchesMask=vector<char>(), int flags=DrawMatchesFlags::DEFAULT )`
-
-`void drawMatches(const Mat& img1, const vector<KeyPoint>& keypoints1, const Mat& img2, const vector<KeyPoint>& keypoints2, const vector<vector<DMatch>>& matches1to2, Mat& outImg, const Scalar& matchColor=Scalar::all(-1), const Scalar& singlePointColor=Scalar::all(-1), const vector<vector<char>>& matchesMask=vector<vector<char> >(), int flags=DrawMatchesFlags::DEFAULT )`
-
-给定两幅图像，绘制寻找到的特征关键点及其匹配.
-
-* *img1* – First source image.
-
-* *keypoints1* – Keypoints from the first source image.
-
-* *img2* – Second source image.
-
-* *keypoints2* – Keypoints from the second source image.
-
-* *matches* – Matches from the first image to the second one, which means that keypoints1[i] has a corresponding point in keypoints2[matches[i]] .
-
-* *outImg* – Output image. Its content depends on the flags value defining what is drawn in the output image. See possible flags bit values below.
-
-* *matchColor* – Color of matches (lines and connected keypoints). If matchColor==Scalar::all(-1) , the color is generated randomly.
-
-* *singlePointColor* – Color of single keypoints (circles), which means that keypoints do not have the matches. If singlePointColor==Scalar::all(-1) , the color is generated randomly.
-
-* *matchesMask* – Mask determining which matches are drawn. If the mask is empty, all matches are drawn.
-
-* *flags* – Flags setting drawing features. Possible flags bit values are defined by DrawMatchesFlags.
-
-##### drawKeypoints
-
-`void drawKeypoints(const Mat& image, const vector<KeyPoint>& keypoints, Mat& outImg, const Scalar& color=Scalar::all(-1), int flags=DrawMatchesFlags::DEFAULT )`
-
-绘制特征关键点.
-
-* *image* – Source image.
-
-* *keypoints* – Keypoints from the source image.
-
-* *outImg* – Output image. Its content depends on the flags value defining what is drawn in the output image. See possible flags bit values below.
-
-* *color* – Color of keypoints.
-
-* *flags* – Flags setting drawing features. Possible flags bit values are defined by DrawMatchesFlags. See details above in drawMatches() .
