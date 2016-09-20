@@ -400,3 +400,36 @@ float distance;
 * *status* – Output array of N elements, every element of which is set to 0 for outliers and to 1 for the other points. The array is computed only in the RANSAC and LMedS methods. For other methods, it is set to all 1’s.
 
 **注意**：points1，points2均是Mat类型，不能直接使用 KeyPoint 类对象，所以要将 KeyPoint 类型对象转换为 Mat 类型对象，而且必须是2维，float类型，CV_32F的 Mat。
+
+### PnP
+
+#### solvePnPRansac
+
+` void solvePnPRansac(InputArray objectPoints, InputArray imagePoints, InputArray cameraMatrix, InputArray distCoeffs, OutputArray rvec, OutputArray tvec, bool useExtrinsicGuess=false, int iterationsCount=100, float reprojectionError=8.0, int minInliersCount=100, OutputArray inliers=noArray(), int flags=CV_ITERATIVE )`
+
+* *objectPoints* – Array of object points in the object coordinate space, 3xN/Nx3 1-channel or 1xN/Nx1 3-channel, where N is the number of points. vector<Point3f> can be also passed here.
+
+* *imagePoints* – Array of corresponding image points, 2xN/Nx2 1-channel or 1xN/Nx1 2-channel, where N is the number of points. vector<Point2f> can be also passed here.
+
+
+* *cameraMatrix* – Input camera matrix <img src="http://leiym.com/img/in-post/post-opencv/camera_matrix.png"/>
+
+* *distCoeffs* – Input vector of distortion coefficients of 4, 5, or 8 elements. If the vector is NULL/empty, the zero distortion coefficients are assumed.
+
+* *rvec* – Output rotation vector (see Rodrigues() ) that, together with tvec , brings points from the model coordinate system to the camera coordinate system.
+
+* *tvec* – Output translation vector.
+
+* *useExtrinsicGuess* – If true (1), the function uses the provided rvec and tvec values as initial approximations of the rotation and translation vectors, respectively, and further optimizes them.
+
+* *iterationsCount* – Number of iterations.
+
+* *reprojectionError* – Inlier threshold value used by the RANSAC procedure. The parameter value is the maximum allowed distance between the observed and computed point projections to consider it an inlier.
+
+* *minInliersCount* – Number of inliers. If the algorithm at some stage finds more inliers than minInliersCount , it finishes.
+
+* *inliers* – Output vector that contains indices of inliers in objectPoints and imagePoints .
+
+* flags – Method for solving a PnP problem (see solvePnP() ).
+
+**注意**：这个函数需要输入一组匹配好的三维点: objectPoints 和一组二维图像点: imagePoints. 返回的结果是旋转向量 rvec 和平移向量tvec。其他的都是算法中的参数。因此，需要想办法构建这两组输入点，它们实际上就是从 DMatch 类型的匹配点里抽取出来的。
