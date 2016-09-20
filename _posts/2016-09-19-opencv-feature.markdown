@@ -10,8 +10,6 @@ tags:
     - vslam
 ---
 
-<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
 - [特征点检测和图像匹配](#特征点检测和图像匹配)
 	- [特征检测子（关键点）与描述子](#特征检测子关键点与描述子)
 	- [特征检测子公用接口](#特征检测子公用接口)
@@ -38,8 +36,8 @@ tags:
 		- [drawKeypoints](#drawkeypoints)
 - [RANSAC](#ransac)
 	- [findFundamentalMat](#findfundamentalmat)
-
-<!-- /TOC -->
+- [PnP](#pnp)
+	- [solvePnPRansac](#solvepnpransac)
 
 
 ### 特征点检测和图像匹配
