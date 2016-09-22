@@ -33,9 +33,33 @@ tags:
 
 ### 读取文件
 
-fstream
-ifstream
-ofstream
+#### 文件操作头文件以及类
+
+```
+#include <fstream>  
+ofstream         //文件写操作 内存写入存储设备   
+ifstream         //文件读操作，存储设备读区到内存中  
+fstream          //读写操作，对打开的文件可进行读写操作
+```
+#### open
+
+`void open ( const char * filename, ios_base::openmode mode = ios_base::in | ios_base::out );`
+
+* *filename* ：操作文件名。
+* *mode* ：打开文件方式，有如下几种。
+
+|选项|意义|
+|:---:|:---:|
+|ios::in|为输入(读)而打开文件|
+|ios::out|为输出(写)而打开文件|
+|ios::ate|初始位置：文件尾|
+|ios::app|所有输出附加在文件末尾|
+|ios::trunc|如果文件已存在则先删除该文件|
+|ios::binary|二进制方式|
+
+这些方式是能够以“或”运算（“|”）的方式进行组合使用的。
+
+####
 
 ### 字符串类型转换
 
