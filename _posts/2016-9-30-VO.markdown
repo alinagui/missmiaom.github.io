@@ -1,0 +1,66 @@
+---
+layout:     post
+title:      "VO DIY小记"
+subtitle:   " \"SLAM\""
+date:       2016-09-30
+author:     "Leiym"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - vslam
+---
+
+> 本篇博客记录了在 DIY VO时碰到的问题，解决办法，以及心得体会。
+
+### opencv
+
+---
+
+#### solvePnPRansac
+
+opencv中解决 *PnP* （透视n点定位） 问题的一个函数，其用到了 RANSAC 优化方法，这里主要是用于得到 3D-2D 的相机位姿变换关系。定义如下：
+
+```
+void solvePnPRansac(InputArray objectPoints, InputArray imagePoints, InputArray cameraMatrix, InputArray distCoeffs,
+                    OutputArray rvec, OutputArray tvec,
+                    bool useExtrinsicGuess=false, int iterationsCount=100, float reprojectionError=8.0, int minInliersCount=100, OutputArray inliers=noArray(), int flags=ITERATIVE )
+```
+
+*objectPoints* 是前一帧的三维点，*imagePoints* 是后一帧的二维点，它们必须经过特征检测匹配成对。
+
+*rvec* 和 *tvec* 代表两帧之间的相机姿态变换，分别代表旋转向量和平移向量，这里说向量，是因为他们均是 3*1 的 Mat。在后续的运用时，计算旋转时通常利用 *Rodrigues* 函数将 *rvec* 转换成 3*3 的旋转矩阵。
+
+#### Rodrigues
+
+opencv中将旋转矩阵和旋转向量互相转换的函数。定义如下：
+
+`void Rodrigues(InputArray src, OutputArray dst, OutputArray jacobian=noArray())`
+
+如果 *src* 是 3*1 或者 1*3的旋转向量， 那么 *dst* 则是 3*3 的旋转矩阵。相反，如果 *src* 是 3*3 的旋转矩阵，那么 *dst* 则是 3*1 或者 1*3的旋转向量。
+
+### tf
+
+---
+
+#### Transform
+
+利用ros中的tf，可以很方便的计算旋转变换和平移变换。 *tf::Transform* 既可以存储位姿信息，又可以代表位姿变换，而且重载了 * 运算，只需要将旋转平移信息赋值即可用 * 运算进行坐标变换。
+
+`Transform (const Matrix3x3 &b, const Vector3 &c=Vector3(tfScalar(0), tfScalar(0), tfScalar(0)))`
+
+这是 Transform 的一个构造函数，参数为 Matrix3x3 类型的旋转矩阵，和一个可选的 Vector3 类型的平移向量。
+
+Matrix3x3 的构造函数如下：
+
+`Matrix3x3 (const tfScalar &xx, const tfScalar &xy, const tfScalar &xz, const tfScalar &yx, const tfScalar &yy, const tfScalar &yz, const tfScalar &zx, const tfScalar &zy, const tfScalar &zz)`
+
+Vector3 的构造函数如下：
+
+`Vector3(tfScalar(0), tfScalar(0), tfScalar(0))`
+
+利用这些构造函数便可以很快的创建一个包含旋转和平移信息的 Transform。
+
+两个 Transform 利用 * 运算，即可得到第一个 Transform 相对于第二个 Transform 的坐标变换。
+
+得到了变换之后包含位姿信息的 Transform ，利用 *tf::poseTFToMsg* 函数便可将 Transform 转换成我们需要的 pose 消息，其定义如下：
+
+`static void 	poseTFToMsg (const Pose &bt, geometry_msgs::Pose &msg)`
