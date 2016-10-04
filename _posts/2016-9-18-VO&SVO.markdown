@@ -88,7 +88,7 @@ tags:
 
 延伸阅读： [Performance evaluation of
 feature detection and matching in stereo visual
-odometry](www.baidu.com)
+odometry](www.leiym.com/pdf/Performance evaluation.pdf)
 
 ##### 特征检测匹配加速策略
 
