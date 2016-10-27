@@ -1,0 +1,205 @@
+---
+layout:     post
+title:      "rtabmap_ros 从入门到放弃"
+subtitle:   " \"rtabmap_ros\""
+date:       2016-10-27
+author:     "Leiym"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - ROS
+---
+
+> 本文着重讲使用，算法层面不会涉及，希望大家玩的开心。
+
+### rtabmap + kinect v1
+
+使用 kinect 跑 rtabmap 的方法十分简单，启动两个 launch 就可以看到结果了。
+
+```
+$ roslaunch freenect_launch freenect.launch depth_registration:=true
+
+$ roslaunch rtabmap_ros rgbd_mapping.launch rtabmap_args:="--delete_db_on_start"
+```
+
+第一个是启动 kinect 的驱动程序，由 freenect_launch 包提供。
+
+第二个就是启动 rtabmap\_ros 中的 rgbd\_mapping，后面的参数的含义是删除掉之前 db 文件，重新建图。
+
+如果没有错误的话就可以在 rtabmap 定制化的界面中看到生成的三维地图了。
+
+<img src="http://leiym.com/img/in-post/post-rtabmap/rtabmap1.png"/>
+
+ 
+### rtabmap + stereo camera
+
+双目比kinect稍微麻烦一点，因为摄像头采集图像时是按照opencv的坐标系来的，如果我们正对图像，图像的左上角为原点，图像矩形上边界为X轴，正右方为X轴正向，左边界为Y轴，正下方为Y轴正向，垂直与图像平面为Z轴，方向往外为Z轴正向。而 ROS 的世界坐标系是以机器人的正前方为X轴正向，正左方为Y轴正向，正上方为Z轴正向。所以在使用双目时需要经过一个坐标系变换，这个由 tf 包中的 *static_transform_publisher* 节点即可实现。
+
+```
+<arg name="pi/2" value="1.5707963267948966" />
+<arg name="optical_rotate" value="0 0 0 -$(arg pi/2) 0 -$(arg pi/2)" />
+<node pkg="tf" type="static_transform_publisher" name="camera_to_base_link"
+     args="$(arg optical_rotate) laser_link camera_base_link 100" > 
+		<remap from="tf"   to="tf_static"/>
+</node> 
+```
+
+启动这个节点的功能就是产生一个固定的由  *camera_base_link* 到 handsfree的 *laser_link* 的 tf 变换。*static\_transform\_publisher* 的用法如下：
+
+```
+static_transform_publisher x y z yaw pitch roll frame_id child_frame_id period_in_ms
+```
+
+在启动双目相机的 launch 文件中，记得加入 *stereo_image_proc* 来对图像进行矫正，当然做这些之前还需要标定哦，标定的方法就不在赘述了。
+
+```
+<group ns="/stereo_camera" >   
+  <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc"/>
+</group>
+```
+
+启动相机之后，运行：
+
+```
+roslaunch rtabmap_ros stereo_mapping.launch stereo_namespace:="/stereo_camera" rtabmap_args:="--delete_db_on_start"
+```
+
+应该就可以看到 rtabmap 的界面了，双目主要的问题在于上面提到的坐标系之间的转换和话题名称的对应，话题名称对应的问题使用 *rqt_graph* 应该很好解决。
+
+### 运行界面以及参数调整
+
+在打开 rtabmap 界面之后，会看到正中间有三维地图，左侧有显示闭环检测，视觉里程计等等的小窗口，这些都是来辅助查看算法运行效果的。建议大家在 *windows* 选项下试一试所有的窗口。
+
+在建图完成之后，rtabmap 会自动在 *~/.ros/* 隐藏文件夹下产生 *rtabmap.db* 文件，这个文件包含的内容很多，不仅有三维地图，还有关键帧，甚至还有闭环检测的信息。而 rtabmap 提供的查看 db 文件的工具 *rtabmap-databaseViewer* 也是强大的不行。运行：
+
+```
+rtabmap-databaseViewer ~/.ros/rtabmap.db
+```
+
+可以看到以下界面：
+
+<img src="http://leiym.com/img/in-post/post-rtabmap/rtabmap1.png"/>
+
+这个工具来看算法的运行效果简直无敌，拖动下方的进度条可以查看对应帧之间的特征匹配结果，在 *view* 选项中，还可以查看三维地图，如果有 scan 信息的话还可以查看二维地图，在 *info* 中还可以看到 *Ground truth* *Total odometry length* 等等数据。在 *edit* 选项中，还可以生成 g2o graph，甚至还能进行更多的闭环检测。
+
+rtabmap 自带工具的话就介绍到这里，功能太多不能一一去给大家讲解。下面来大致讲一下调整参数的方法。
+
+我们可以运行以下命令获取 rtabmap 的参数：
+
+```
+rosrun rtabmap_ros rtabmap --params
+rosrun rtabmap_ros rgbd_odometry --params
+```
+
+运行之后，参数的名称以及介绍都会打印在终端中，大家可以重定向到文件中以留备份查看。参数需要根据不同的使用环境来设置，这是一个相当痛苦的过程，建议大家先浏览一遍相关的论文，然后再根据wiki上的教程调试。[论文地址](http://introlab.github.io/rtabmap/)，[参数调整方法](http://wiki.ros.org/rtabmap_ros/Tutorials/Advanced%20Parameter%20Tuning)
+
+### 使用rtabmap + handsfree 进行导航
+
+使用 rtabmap + handsfree 进行导航其实是用 rtabmap 的投影地图或者是scan地图来作为 move_base 的地图输入，然后利用 Navigation Stack 进行路径规划等。
+
+#### 使用 scan 地图
+
+rtabmap 可以接收 Laserscan 话题数据来生成二维地图，这种地图和现有的二维SLAM效果类似，生成的地图比较干净，但是需要生成激光的设备，或者将 kinect 水平放置，模拟激光数据。
+
+```
+  <!-- freenect for kinect -->
+  <include file="$(find freenect_launch)/launch/freenect.launch">
+    <arg name="depth_registration" value="true"/>
+  </include>
+  <!-- freenect for kinect END -->
+
+  <!-- rtabmap -->
+  <include file="$(find SLAM_ROS)/launch/rgbd_mapping.launch">
+    <arg name="rtabmap_args"      value="--delete_db_on_start"/>
+    <arg name="subscribe_scan"    value="true"/>
+    <arg name="frame_id"          value="/base_link"/>
+    <arg name="visual_odometry"   value="false"/>
+    <arg name="odom_topic"        value="/mobile_base/mobile_base_controller/odom"/>
+  </include>
+  <!-- rtabmap END -->
+
+  <!-- scan -->
+  <node pkg="nodelet" type="nodelet" name="depthimage_to_laserscan" args="load depthimage_to_laserscan/DepthImageToLaserScanNodelet camera/camera_nodelet_manager" output="screen">
+    <!-- Pixel rows to use to generate the laserscan. For each column, the scan will
+         return the minimum value for those pixels centered vertically in the image. -->
+    <param name="scan_height" value="10"/>
+    <param name="output_frame_id" value="/base_link"/>
+    <param name="range_min" value="0.45"/>
+    <remap from="image" to="/camera/depth_registered/image_raw"/>
+    <remap from="scan" to="/scan"/>
+
+    <!-- Somehow topics here get prefixed by "$(arg camera)" when not inside an app namespace,
+         so in this case "$(arg scan_topic)" must provide an absolute topic name (issue #88).
+         Probably is a bug in the nodelet manager: https://github.com/ros/nodelet_core/issues/7 -->
+    <remap from="camera/image" to="/camera/depth_registered/image_raw"/>
+    <remap from="camera/scan" to="/scan"/>
+  </node>
+  <!-- scan END -->
+```
+
+先启动 freenect.launch，再启动 rtabmap\_ros 的 rgbd\_mapping.launch，注意，这里需要将 *subscaribe_scan* 设置为 true，表示接收 scan 数据。最后一个就是 *depthimage_to_laserscan* 这个 nodelet 了，这个 nodelet 是用于从深度数据中模拟激光数据，这个想必大家已经很熟悉了。另外，我们将 *visual_odometry* 设置为 false，表示不用视觉里程计然后将 *odom_topic* 设置为 handsfree 的底盘里程计话题，这样可以省下不少计算量，毕竟在室内二维环境中，编码器使最好的选择。
+
+这里选择完了之后，需要将 handsfree 的 move\_base.xml 中 move\_base 节点中的 *map* 重映射为 */rtabmap/grid_map*。
+
+这里还是可能会有两个问题，一个是 tf 的问题，另外一个是话题名称的问题。tf 的问题一般是由于 *frame_id* 这种参数没有设置正确，一般 tf tree 是，map -> odom -> base\_link -> laser\_link(camera_link)。大家可以用 rviz 中的 tf 选项来查看，也可以使用命令：
+
+```
+rosrun tf view_frames
+```
+
+这条命令会监听 5s 的 tf 信息，并会自动在 /home 文件夹下保存 tf tree 为 pdf 文件。
+
+做完了这些，打开你的 rviz，打开默认的也没关系，一个一个添加工具也不是很困难，主要的有两个 Map ，一个用于显示全局地图，一个用于显示局部地图，全局地图的话题选择 */rtabmap/grid_map*，局部地图的话题选择 */move_base_node/local_costmap/costmap* 。然后添加两个 Path ，一个用于显示全局路径，一个用于显示局部路径，全局路径的话题选择 */move_base_node/TrajectoryPlannerROS/global_plan* ，局部路径的话题选择 */move_base_node/TrajectoryPlannerROS/local_plan*。然后添加 LaserScan，用于显示生成的模拟激光，话题选择你的 laserscan 话题名称。
+
+剩下的就是可选可不选的了，如果你想查看三维地图，可以添加 PointCloud2 ，然后话题名称选择 */rtabmap/cloud_map*。
+
+<img src="http://leiym.com/img/in-post/post-rtabmap/rtabmap3.png"/>
+
+接下来的导航就是轻车熟路了，选择 *2D Nav Goal* 指定目标点，然后就可以进行导航了。
+
+#### 使用投影地图
+
+rtabmap 除了可以用 scan 来生成二维地图以外，还可以使用 rtabmap 提供的一个 nodelet ———— *obstacles_detection* 来计算二维投影地图。使用这种方法的好处是不需要激光数据，但是需要将 kinect 向下倾斜一点角度。
+
+```
+  <node pkg="nodelet" type="nodelet" name="obstacles_detection" args="standalone rtabmap_ros/obstacles_detection" output="screen">
+    <remap from="cloud" to="/camera/depth_registered/points"/>
+    <remap from="obstacles" to="/planner_cloud"/>
+
+    <param name="frame_id" type="string" value="base_link"/>
+    <param name="map_frame_id" type="string" value="map"/>
+    <param name="min_cluster_size" type="int" value="20"/>
+    <param name="max_obstacles_height" type="double" value="0.0"/>
+  </node>
+```
+
+在 *obstacles_detection* 这个 nodelet 中，接收名为 *cloud* 的点云数据，生成名为 *ground* 的地面点云和名为 *obstacles* 的障碍物点云。
+
+在之前的 launch 文件中将 rtabmap 中的参数 *subscaribe_scan* 设置为 false，然后再加上以上一个节点。这里是单独启动了一个nodelet，并没有加载 nodelet manager。这里将 *cloud* 重映射为 kinect 产生的点云数据话题 */camera/depth_registered/points*。然后将 *obstacles* 重映射为 */planner_cloud* 。
+
+<img src="http://leiym.com/img/in-post/post-rtabmap/rtabmap5.png"/>
+
+这里可以看到由于是投影地图，并不像激光只扫外面一圈，所以地图显得比较乱，我觉得这种比较适合室外的大场景的SLAM，因为这个并不需要地面是平面。
+
+同样，这里需要将 handsfree 的 move\_base.xml 中 move\_base 节点中的 *map* 重映射为 */rtabmap/grid_map*。
+
+使用投影地图来作为二维地图时，move_base 的参数配置文件也需要改一下了，需要在 *local\_costmap\_param.yaml* 中需要将之前的 *observation\_sources* 从 scan 改为 cloud：
+
+```
+  observation_sources: point_cloud_sensor
+
+  # assuming receiving a cloud from rtabmap_ros/obstacles_detection node
+  point_cloud_sensor: {
+    sensor_frame: base_link,
+    data_type: PointCloud2, 
+    topic: planner_cloud, 
+    expected_update_rate: 0.5, 
+    marking: true, 
+    clearing: true,
+    min_obstacle_height: -99999.0,
+    max_obstacle_height: 99999.0}
+```
+
+这样就可以使用 *obstacles_detection* 这个nodelet生成的障碍物点云来作为 costmap 的障碍物来源了。注意，这里的 topic 必须和 *obstacles_detection* 产生的障碍物点云的话题名一样。
+
+这样就基本上配置好了两种不同方法的导航环境，没有问题的话即可像普通二维地图那样进行导航。
+
