@@ -77,7 +77,7 @@ rtabmap-databaseViewer ~/.ros/rtabmap.db
 
 可以看到以下界面：
 
-<img src="http://leiym.com/img/in-post/post-rtabmap/rtabmap1.png"/>
+<img src="http://leiym.com/img/in-post/post-rtabmap/rtabmap2.png"/>
 
 这个工具来看算法的运行效果非常给力，拖动下方的进度条可以查看对应帧之间的特征匹配结果，在 *view* 选项中，还可以查看三维地图，如果有 scan 信息的话还可以查看二维地图，在 *info* 中还可以看到 *Ground truth* 、 *Total odometry length* 等等数据。在 *edit* 选项中，还可以生成 g2o graph，甚至还能再对该数据集进行更多的闭环检测。
 
