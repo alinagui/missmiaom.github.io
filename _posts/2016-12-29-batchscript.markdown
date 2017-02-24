@@ -6,7 +6,7 @@ date:       2016-12-19
 author:     "Leiym"
 header-img: "img/post-bg-2015.jpg"
 tags:
-    - ROS
+    - bat
 ---
 
 > 本文主要记录windows的批处理脚本bat的编写记录，文章大部分来自于 Steve Jansen 的博客，网址：http://steve-jansen.github.io/guides/windows-batch-scripting/index.html，在此感谢作者通俗易懂的教程，本人为以后方便查阅作一记录。
